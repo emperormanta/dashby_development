@@ -25,7 +25,6 @@ class MasterTargetController < ApplicationController
             csv_text = File.read(file.path)
             csv = CSV.parse(csv_text, headers: true, skip_blanks: true).delete_if { |row| row.to_hash.values.all?(&:blank?) }
             csv.each_with_index do |row, row_index|
-                
                 row.each_with_index do |col, col_index|
                     if col[1].present?
                         data = col[1].gsub(/[,.]/, "," => "", "." => "")
@@ -41,7 +40,7 @@ class MasterTargetController < ApplicationController
                             arr_target_one_time.push(data)
                         elsif col_index == 7
                             arr_target_nominal_tolerance.push(data)
-                        elsif col_index = 8
+                        elsif col_index == 8
                             arr_target_acquisition.push(data)
                         end
                     else
@@ -62,7 +61,7 @@ class MasterTargetController < ApplicationController
                     for i in 0..users.length-1
                         data_insert.push("(#{users[i]['id']}, #{arr_target_nominal[i]}, #{arr_target_hitrate[i]}, #{arr_target_periodic[i]},
                             #{arr_target_one_time[i]}, #{arr_target_nominal_tolerance[i]}, #{arr_target_acquisition[i]}, true, 
-                            '#{time.strftime("%Y-%d-%m %H:%M:%S")}', '#{time.strftime("%Y-%d-%m %H:%M:%S")}')")
+                            '#{time.strftime("%Y-%m-%d %H:%M:%S")}', '#{time.strftime("%Y-%m-%d %H:%M:%S")}')")
                     end
 
                     MasterTarget.update_all(active: false)

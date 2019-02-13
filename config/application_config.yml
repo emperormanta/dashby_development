@@ -1,0 +1,28 @@
+default: &default
+
+  # Exception Notifier for Mattermost
+  use_exception_notifier: true
+  notification_hook_url: "https://chat.dwp.io/hooks/gb1kyjrew7rzbprefke8xwx1bc"
+  notification_channel_name: "itapps-bugreports"
+  notification_mentions: "@willy.tedjakusuma @fernando.baskoro @kevin.goentoro"
+  notification_bot_username: "Dashby Bot"
+
+development: &development
+  <<: *default
+  use_exception_notifier: false
+  oauth: "http://localhost:3001"
+  app_id: "a45018509f77df8addfd29e3be41ba58abc01d630f5eab4f8a6fb0ea9ceaa2e9"
+  app_secret: "fb1b5858fc3632c369e246fb5c7dda09ab4cb525a5fb904337c0f3a394dc7353"
+
+  # Oauth
+  # oauth: "http://192.168.1.78:3001/"
+
+test:
+  <<: *default
+
+production: &production
+  <<: *default
+  oauth: "https://auth.dwp.io"
+
+staging:
+  <<: *default

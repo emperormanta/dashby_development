@@ -80,7 +80,6 @@ gem 'batch-loader'
 # notif to mattermost
 gem 'exception_notification'
 
-gem 'graphiql-rails', group: :development
 gem 'carrierwave', '~> 1.0'
 
 group :development do

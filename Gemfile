@@ -81,3 +81,13 @@ gem 'batch-loader'
 gem 'exception_notification'
 
 gem 'graphiql-rails', group: :development
+gem 'carrierwave', '~> 1.0'
+
+group :development do
+    gem 'capistrano',         require: false
+    gem 'capistrano-rvm',     require: false
+    gem 'capistrano-rails',   require: false
+    gem 'capistrano-bundler', require: false
+    gem 'capistrano3-puma',   require: false
+    gem 'capistrano-sidekiq', require: false
+end

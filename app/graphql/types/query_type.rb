@@ -59,5 +59,35 @@ module Types
     def get_targets
       MasterTarget.all
     end
+
+    field :get_nilai_proposal_setahun, Types::ReportMonthType, null: true do
+      argument :user_token, String, required: false
+    end
+    def get_nilai_proposal_setahun(user_token:)
+      proposal = GraphqlApi.customer(QueryModules::QueryCustomer.test_get_proposal(user_token))
+      data = proposal["data"]["user"]["proposalTest"]
+      return get_current_month_proposal(data, user_token)
+    end
+
+    private
+    def get_current_month_proposal(object, user_token)
+      result = {}
+      result[:user] = User.find_by(authentication_token: user_token).email
+      result[:proposal] = []
+      month = 0
+      12.times do
+        current_month_proposal = []
+        proposal_price = 0
+        data = {}
+        month += 1
+        current_month_name = Date::MONTHNAMES[month].to_date.strftime('%b').upcase
+        object.map { |data| data["createdAt"].to_date.month == month ? current_month_proposal.push(data) : nil }
+        current_month_proposal.map {|data| data["product"].map{ |periodic| proposal_price += periodic["periodicFee"]["finalPrice"]}}
+        data[:month] = current_month_name
+        data[:total] = proposal_price
+        result[:proposal].push(data)
+      end
+      return result
+    end
   end
 end

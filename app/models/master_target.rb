@@ -1,0 +1,2 @@
+class MasterTarget < ApplicationRecord
+end

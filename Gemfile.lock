@@ -301,7 +301,6 @@ DEPENDENCIES
   puma (~> 3.11)
   rack-cors
   rails (~> 5.2.2)
-  redis (~> 4.0)
   sass-rails (~> 5.0)
   selenium-webdriver
   sidekiq

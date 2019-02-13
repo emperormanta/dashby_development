@@ -1,4 +1,4 @@
-class ApplicationController < ActionController::Base
+class ApplicationController < ActionController::API
   before_action :authenticate_user!, if: :not_authenticate_token
 
   def check_auth_token
@@ -12,12 +12,16 @@ class ApplicationController < ActionController::Base
   end
 
   def not_authenticate_token
-      user = check_auth_token
-      if user
-        # pass_token(user)
-        false
-      else
-        true
-      end
+    user = check_auth_token
+    if user
+      pass_token(user)
+      false
+    else
+      true
+    end
+  end
+
+  def pass_token(user)
+    GraphqlApi.token_api = user.authentication_token
   end
 end

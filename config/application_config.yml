@@ -14,6 +14,8 @@ development: &development
   app_id: "a45018509f77df8addfd29e3be41ba58abc01d630f5eab4f8a6fb0ea9ceaa2e9"
   app_secret: "fb1b5858fc3632c369e246fb5c7dda09ab4cb525a5fb904337c0f3a394dc7353"
 
+  customer_api: "https://customertrial.dwp.io/graphql"
+
   # Oauth
   # oauth: "http://192.168.1.78:3001/"
 

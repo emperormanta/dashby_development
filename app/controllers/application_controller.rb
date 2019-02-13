@@ -1,4 +1,4 @@
-class ApplicationController < ActionController::Base
+class ApplicationController < ActionController::API
   before_action :authenticate_user!, if: :not_authenticate_token
 
   def check_auth_token

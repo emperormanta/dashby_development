@@ -1,7 +1,7 @@
 class GraphqlController < ApplicationController
   # skip_before_action :verify_authenticity_token
   def execute
-    current_user = check_auth_token
+    # current_user = check_auth_token
     variables = ensure_hash(params[:variables])
     query = params[:query]
     operation_name = params[:operationName]

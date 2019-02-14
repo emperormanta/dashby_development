@@ -75,7 +75,7 @@ module Types
       user = User.find_by(authentication_token: user_token)
       result[:user] = user.email
       result[:proposal] = []
-      result[:target] = MasterTarget.find_by(user_id: user.id).nominal
+      result[:target_proposal] = MasterTarget.find_by(user_id: user.id).nominal
       month = 0
       12.times do
         current_month_proposal = []

@@ -83,7 +83,7 @@ module Types
         current_month_name = Date::MONTHNAMES[month].to_date.strftime('%b').upcase
         object.map { |data| data["createdAt"].to_date.month == month ? current_month_proposal.push(data) : nil }
         current_month_proposal.map {|data| data["product"].map{ |periodic| proposal_price += periodic["periodicFee"]["finalPrice"]}}
-        data[:month] = current_month_name
+        data[:name] = current_month_name
         data[:total] = proposal_price
         result[:proposal].push(data)
       end

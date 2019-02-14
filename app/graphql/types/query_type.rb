@@ -71,25 +71,32 @@ module Types
 
     private
     def get_current_month_proposal(object, user_token)
-      result = {}
-      user = User.find_by(authentication_token: user_token)
-      result[:user] = user.email
-      result[:proposal] = []
-      result[:target_proposal] = MasterTarget.find_by(user_id: user.id).nominal
-      month = 0
-      12.times do
-        current_month_proposal = []
-        proposal_price = 0
-        data = {}
-        month += 1
-        current_month_name = Date::MONTHNAMES[month].to_date.strftime('%b').upcase
-        object.map { |data| data["createdAt"].to_date.month == month ? current_month_proposal.push(data) : nil }
-        current_month_proposal.map {|data| data["product"].map{ |periodic| proposal_price += periodic["periodicFee"]["finalPrice"]}}
-        data[:name] = current_month_name
-        data[:total] = proposal_price
-        result[:proposal].push(data)
+      begin
+        result = {}
+        user = User.find_by(authentication_token: user_token)
+        target = MasterTarget.find_by(user_id: user.id)
+        if user.present? && target.present?
+          result[:user] = user.email
+          result[:proposal] = []
+          result[:target_proposal] = 
+          month = 0
+          12.times do
+            current_month_proposal = []
+            proposal_price = 0
+            data = {}
+            month += 1
+            current_month_name = Date::MONTHNAMES[month].to_date.strftime('%b').upcase
+            object.map { |data| data["createdAt"].to_date.month == month ? current_month_proposal.push(data) : nil }
+            current_month_proposal.map {|data| data["product"].map{ |periodic| proposal_price += periodic["periodicFee"]["finalPrice"]}}
+            data[:name] = current_month_name
+            data[:total] = proposal_price
+            result[:proposal].push(data)
+          end
+          return result
+        end
+      rescue => e
+        raise GraphQL::ExecutionError, "User atau Target tidak ditemukan"
       end
-      return result
     end
   end
 end

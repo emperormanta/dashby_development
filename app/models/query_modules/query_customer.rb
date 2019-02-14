@@ -98,5 +98,35 @@ module QueryModules
       }
       )
     end
+
+    def self.test_get_proposal(token)
+      %(query{
+          user(token: "#{token}"){
+            proposalTest{
+              project{
+                id
+                projectName
+                pic{
+                  fullName
+                }
+              }
+              customer{
+                name
+              }
+              product{
+                name
+                periodicFee{
+                  componentName
+                  quantity
+                  unit
+                  finalPrice
+                }
+              }
+              createdAt
+            }
+          }
+        }
+      )
+    end
   end
 end

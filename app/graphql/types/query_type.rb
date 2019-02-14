@@ -72,8 +72,10 @@ module Types
     private
     def get_current_month_proposal(object, user_token)
       result = {}
-      result[:user] = User.find_by(authentication_token: user_token).email
+      user = User.find_by(authentication_token: user_token)
+      result[:user] = user.email
       result[:proposal] = []
+      result[:target] = MasterTarget.find_by(user_id: user.id).nominal
       month = 0
       12.times do
         current_month_proposal = []

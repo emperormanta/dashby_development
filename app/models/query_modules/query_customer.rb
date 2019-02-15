@@ -99,10 +99,10 @@ module QueryModules
       )
     end
 
-    def self.test_get_proposal(token)
+    def self.get_proposal_yearly(token)
       %(query{
           user(token: "#{token}"){
-            proposalTest{
+            proposalYearly{
               project{
                 id
                 projectName
@@ -119,6 +119,31 @@ module QueryModules
                   componentName
                   quantity
                   unit
+                  finalPrice
+                }
+              }
+              createdAt
+            }
+          }
+        }
+      )
+    end
+    
+    def self.get_mou_yearly(token)
+      %(query{
+          user(token: "#{token}"){
+            mousWithComponentYearly{
+              projectId
+              projectType
+              pic{
+                fullName
+              }
+              customer{
+                name
+              }
+              mouProducts{
+                name
+                periodicFee{
                   finalPrice
                 }
               }

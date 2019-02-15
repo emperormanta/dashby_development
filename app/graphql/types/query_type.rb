@@ -115,7 +115,7 @@ module Types
         if user.present? && target.present?
           result[:user] = user.email
           result[:sf] = []
-          result[:target_sf] = target
+          result[:target_sf] = target.periodic
           month = 0
           12.times do
             current_month_proposal = []

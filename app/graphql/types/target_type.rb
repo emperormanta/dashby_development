@@ -9,7 +9,7 @@ class Types::TargetType < GraphQL::Schema::Object
   field :acquisition, Integer, null: false
 
   def user_name
-    user = User.find_by(user_id: object.user_id)
+    user = User.find_by(id: object.user_id)
     return user.full_name
   end
 end

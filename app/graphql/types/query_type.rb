@@ -29,13 +29,13 @@ module Types
       sf["data"]["user"]["mousWithComponent"]
     end
 
-    field :get_nilai_proposal, Types::NilaiProposalType, null: true do
+    field :get_nilai_proposal, [Types::NilaiProposalType], null: true do
       argument :token, String, required: true
       argument :month, Int, required: true
     end
     def get_nilai_proposal(token:, month:)
       proposal = GraphqlApi.customer(QueryModules::QueryCustomer.get_proposal_user(token, month))
-      proposal["data"]["user"]
+      return proposal["data"]["user"]["proposals"].present? ? proposal["data"]["user"] : []
     end
 
     field :get_nilai_sf, Types::NilaiSfType, null: true do
@@ -60,13 +60,13 @@ module Types
       MasterTarget.all
     end
 
-    field :get_nilai_proposal_setahun, Types::ReportMonthType, null: true do
+    field :get_nilai_proposal_setahun, [Types::ReportMonthType], null: true do
       argument :user_token, String, required: false
     end
     def get_nilai_proposal_setahun(user_token:)
       proposal = GraphqlApi.customer(QueryModules::QueryCustomer.get_proposal_yearly(user_token))
       data = proposal["data"]["user"]["proposalYearly"]
-      return get_proposal(data, user_token)
+      return get_proposal(data, user_token).present? ? get_proposal(data, user_token) : []
     end
 
     field :get_nilai_sf_setahun, Types::ReportMonthType, null: true do

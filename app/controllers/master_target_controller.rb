@@ -1,4 +1,5 @@
 class MasterTargetController < ApplicationController
+    skip_before_action :authenticate_user!, only: [:download_template]
     include UploadCsvHelper
     require 'csv'
     
@@ -76,8 +77,10 @@ class MasterTargetController < ApplicationController
                     render json: { success: false, messages: "Users on CSV file doesnt exist on table 'users'" }
                 end
             end
-        else
+        elsif file.content_type != "text/csv"
             render json: { success: false, messages: "File is not CSV" }
+        else
+            render json: { success: false, messages: "No file selected" }
         end
     end
 end

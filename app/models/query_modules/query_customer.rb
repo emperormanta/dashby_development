@@ -79,6 +79,7 @@ module QueryModules
       %(query{
         user(token: "#{token}") {
           mousWithComponent(params: {month: #{month}}) {
+            mouId
             mouProducts {
               name
               periodicFee {
@@ -133,6 +134,7 @@ module QueryModules
       %(query{
           user(token: "#{token}"){
             mousWithComponentYearly{
+              mouId
               projectId
               projectType
               pic{
@@ -152,6 +154,27 @@ module QueryModules
           }
         }
       )
+    end
+
+    def self.get_mou_dashby(token, month)
+      query = "{
+        getMouDashby(token: \"#{token}\", monthPaymentDate: #{month})
+        {
+          mouId
+          projectId
+          paymentStatus
+          paymentDate
+        }
+      }"
+    end
+
+    def self.get_proposal_dashby(project_id)
+      query = "{
+        getProposalDashby(projectId: #{project_id}){
+          projectId
+          createdAt
+        }
+      }"
     end
   end
 end

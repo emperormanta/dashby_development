@@ -30,7 +30,7 @@ module Types
       sf["data"]["user"]["mousWithComponent"]
     end
 
-    field :get_nilai_proposal, [Types::NilaiProposalType], null: true do
+    field :get_nilai_proposal, Types::NilaiProposalType, null: true do
       argument :token, String, required: true
       argument :month, Int, required: true
     end
@@ -61,7 +61,7 @@ module Types
       MasterTarget.all.where(active: true)
     end
 
-    field :get_nilai_proposal_setahun, [Types::ReportMonthType], null: true do
+    field :get_nilai_proposal_setahun, Types::ReportMonthType, null: true do
       argument :user_token, String, required: false
     end
     def get_nilai_proposal_setahun(user_token:)

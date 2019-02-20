@@ -16,7 +16,6 @@ module ApplicationHelper
     total_periodic_xcost = 0
     if current_user_mou_product_ids.present?
       xcosts = GraphqlApi.xcost(QueryModules::QueryXcost.get_costs(current_user_mou_product_ids))
-      binding.pry
       if xcosts["data"].present?
         xcosts = JSON.parse(xcosts["data"]["getCosts"])
         xcosts["mou_products"].each do |mou_product|

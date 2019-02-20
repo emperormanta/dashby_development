@@ -10,6 +10,18 @@ class GraphqlApi
       :headers => {'Content-Type' => 'application/json'}
     )
   end
+  def self.xcost(query)
+    headers = {
+      'Content-Type' => 'application/json',
+      'Authorization' => "Bearer #{self.token_api}"
+    }
+    HTTParty.post("#{CONFIG["xcost_api"]}",
+      :body => {
+        query: query
+      }.to_json,
+      :headers => headers
+    )
+  end
   # def self.procurement(query)
   #   HTTParty.post("#{CONFIG["procurement_api"]}?auth_token=#{self.token_api}",
   #     :body => {

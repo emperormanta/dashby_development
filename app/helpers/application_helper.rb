@@ -7,7 +7,7 @@ module ApplicationHelper
       sf["data"]["user"]["mousWithComponent"].each do |mou|
           # mou_ids.push(mou["mouId"].to_i)
           mou["mouProducts"].each do |mou_product|
-            current_user_mou_product_ids.push(mou_product["id"])
+            current_user_mou_product_ids.push(mou_product["id"].to_i)
             total_periodic_sf += mou_product["periodicFee"]["finalPrice"]
           end
       end
@@ -25,7 +25,6 @@ module ApplicationHelper
         end
       end
     end
-    binding.pry
     return total_periodic_sf - total_periodic_xcost
   end
 end

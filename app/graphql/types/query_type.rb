@@ -103,7 +103,6 @@ module Types
       # year = datetime.strftime("%Y")
       
       month = sprintf('%02d', month)
-      year = sprintf('%02d', year)
       start_date = "#{year}-#{month}-01"
       end_date = Date.civil(year.to_i, month.to_i, -1)
       end_date = end_date.strftime("%Y-%m-%d")

@@ -17,7 +17,7 @@ module ApplicationHelper
     total_periodic_xcost = 0
     if current_user_mou_product_ids.present?
       xcosts = GraphqlApi.xcost(QueryModules::QueryXcost.get_costs(current_user_mou_product_ids))
-      if xcosts["data"].present?
+      if xcosts["data"]["getCosts"].present?
         xcosts = JSON.parse(xcosts["data"]["getCosts"])
         xcosts["mou_products"].each do |mou_product|
           mou_product["costs"].each do |cost|
@@ -30,15 +30,15 @@ module ApplicationHelper
   end
 
   def total_periodic_proposal(token,month)
-    total_periodic_proposal = 0
+    total = 0
     data = GraphqlApi.customer(QueryModules::QueryCustomer.get_proposal_user(token, month))
     if data["data"]["user"].present?
         data["data"]["user"]["proposals"].each do |proposal|
             proposal["product"].each do |product|
-                total_periodic_proposal += product["periodicFee"]["finalPrice"]
+              total+= product["periodicFee"]["finalPrice"]
             end
         end
     end
-    return total_periodic_proposal
+    return total
   end
 end

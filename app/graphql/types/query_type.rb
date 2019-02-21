@@ -81,31 +81,37 @@ module Types
 
     field :get_hit_rate, [Types::HitRateType], null: false do
       argument :token, String, required: true
-      argument :month, Int, required: true
-      argument :year, Int, required: true
+      argument :month, Int, required: false
+      argument :year, Int, required: false
     end
-    def get_hit_rate(token:, month:, year:)
+    def get_hit_rate(token:, month: nil, year: nil)
       user = User.find_by(authentication_token: token)
+      datetime = DateTime.now
+      month = month.nil? ? datetime.strftime("%m") : month
+      year = year.nil? ?  datetime.strftime("%Y") : year
+
       # month = sprintf('%02d', month)
       # start_date = "#{year}-#{month}-01"
       # end_date = Date.civil(year.to_i, month.to_i, -1)
       # end_date = end_date.strftime("%Y-%m-%d")
+
       active_achievement = ActiveAchievementMonthly.where("user_id = #{user.id}")
     end
 
     field :get_acquisition, [Types::GetAcquisitionType], null: false do
       argument :token, String, required: true
-      argument :month, Int, required: true
-      argument :year, Int, required: true
+      argument :month, Int, required: false
+      argument :year, Int, required: false
     end
 
-    def get_acquisition(token:,month:,year:)
+    def get_acquisition(token:,month: nil,year: nil)
       user = User.find_by(authentication_token: token)
-      # datetime = DateTime.now
+      datetime = DateTime.now
       # day = datetime.strftime("%d")
-      # month = datetime.strftime("%m")
-      # year = datetime.strftime("%Y")
-      
+
+      month = month.nil? ? datetime.strftime("%m") : month
+      year = year.nil? ?  datetime.strftime("%Y") : year
+
       month = sprintf('%02d', month)
       start_date = "#{year}-#{month}-01"
       end_date = Date.civil(year.to_i, month.to_i, -1)

@@ -102,7 +102,6 @@ module Types
       input_month = sprintf('%02d', month)
       year = datetime.strftime("%Y")
       start_date = datetime.strftime("#{year}-#{input_month}-01")
-      binding.pry
       end_date = Date.civil(year.to_i, input_month.to_i, -1)
       end_date = end_date.strftime("%Y-%m-%d")
       Acquisition.where("user_id = #{user.id} AND first_payment_date >= '#{start_date}' AND first_payment_date <= '#{end_date}'")

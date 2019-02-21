@@ -1,3 +1,4 @@
+include ApplicationHelper
 module Types
   class QueryType < Types::BaseObject
     field :hit_rate, Types::HitRateType, null: true do
@@ -97,15 +98,31 @@ module Types
       user = User.find_by(authentication_token: token)
       datetime = DateTime.now
       # day = datetime.strftime("%d")
-      # month = datetime.strftime("%m")
-      month = 1
+      month = datetime.strftime("%m")
       month = sprintf('%02d', month)
       year = datetime.strftime("%Y")
       start_date = datetime.strftime("#{year}-#{month}-01")
       end_date = Date.civil(year.to_i, month.to_i, -1)
       end_date = end_date.strftime("%Y-%m-%d")
-
       Acquisition.where("user_id = #{user.id} AND first_payment_date >= '#{start_date}' AND first_payment_date <= '#{end_date}'")
+    end
+
+    field :get_achievement, Types::AchievementType, null: true do
+      argument :user_token, String, required: false
+    end
+
+    def get_achievement(user_token:)
+      result = {}
+      user = User.find_by(authentication_token: user_token)
+      if user.present?
+        target =  MasterTarget.find_by(user_id: user.id)
+        current_month = Time.now.strftime("%m")
+        result[:target_achievement] = target.present? ? target.periodic : 0
+        result[:current_achievement] = total_net_periodic_fee(user_token, current_month.to_i)
+        result[:percentage] = ((result[:current_achievement] / result[:target_achievement]) * 100).round
+        result[:last_month_achievement] = current_month.to_i > 1 ? total_net_periodic_fee(user_token, current_month.to_i - 1) : 0
+      end
+      return result
     end
 
     private

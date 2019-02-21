@@ -4,6 +4,7 @@ class GraphqlApi
   end
   def self.customer(query)
     HTTParty.post("#{CONFIG["customer_api"]}?auth_token=687608876f524fd34f6ce9830f9bea68",
+    :verify => false,
       :body => {
         query: query
       }.to_json,
@@ -13,9 +14,10 @@ class GraphqlApi
   def self.xcost(query)
     headers = {
       'Content-Type' => 'application/json',
-      'Authorization' => 'Bearer 687608876f524fd34f6ce9830f9bea68'
+      'Authorization' => "Bearer #{self.token_api}"
     }
-    HTTParty.post("http://localhost:3050/graphql",
+    HTTParty.post("#{CONFIG["xcost_api"]}",
+    :verify => false,
       :body => {
         query: query
       }.to_json,

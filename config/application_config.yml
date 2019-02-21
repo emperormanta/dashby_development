@@ -11,11 +11,12 @@ development: &development
   <<: *default
   use_exception_notifier: false
   oauth: "http://localhost:3001"
-  app_id: "27142f6384c8dc07d41502fda2f598f36693837c111aea88eecccefa260f824b"
-  app_secret: "924cfd317fbdcfd5b94fe1cbe74de75047524de4828ce614d40c8473870c09cd"
+  # app_id: "f37039bc9122cdb049d2488e5a3c7aefd002edcde8dbf111459ceb7474472657"
+  # app_secret: "0b9716fa88674c14e5d20155ef6799d8e22a2cb8643fb11bbcd25dc91d5179cc"
 
-  # customer_api: "https://customertrial.dwp.io/graphql"
-  customer_api: "http://localhost:3000/graphql"
+  customer_api: "https://customertrial.dwp.io/graphql"
+  #customer_api: "http://localhost:3000/graphql"
+  xcost_api: "https://trialbackend.dwp.io/graphql"
 
   # Oauth
   # oauth: "http://192.168.1.78:3001/"
@@ -26,6 +27,7 @@ test:
 production: &production
   <<: *default
   oauth: "https://auth.dwp.io"
+  customer_api: "https://customertrial.dwp.io/graphql"
 
 staging:
   <<: *default

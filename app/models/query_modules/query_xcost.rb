@@ -2,7 +2,7 @@ module QueryModules
     module QueryXcost
         def self.get_costs(mou_ids)
             query = "query{
-                getCosts(mouIds: #{mou_ids})
+                getCosts(mouProductIds: #{mou_ids})
               }"
             return query
         end

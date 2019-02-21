@@ -1,5 +1,5 @@
 class CurrentUsersController < ApplicationController
-  skip_before_action :authenticate_user!, :verify_authenticity_token
+  skip_before_action :authenticate_user!
   def me
     query = {
       "client_id"     => params["client_id"],
@@ -20,15 +20,15 @@ class CurrentUsersController < ApplicationController
       response = HTTParty.get("#{CONFIG['oauth']}/me", :headers => { "Authorization" => auth})
 
       @user = CurrentUser.save_current_user(response)
-      apps = AppsToken.all
+      # apps = AppsToken.all
 
-      apps.each do |app|
-        auth_token = check_user_auth_token(app.name, response)
-        if auth_token["count"] == 0 && auth_token
-          create_user(app.name, response)
-          update_token(app.name)
-        end
-      end
+      # apps.each do |app|
+      #   auth_token = check_user_auth_token(app.name, response)
+      #   if auth_token["count"] == 0 && auth_token
+      #     create_user(app.name, response)
+      #     update_token(app.name)
+      #   end
+      # end
     end
     render json: response
   end

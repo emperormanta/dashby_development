@@ -99,10 +99,10 @@ module Types
       datetime = DateTime.now
       # day = datetime.strftime("%d")
       # month = datetime.strftime("%m")
-      input_month = sprintf('%02d', month)
+      month = sprintf('%02d', month)
       year = datetime.strftime("%Y")
-      start_date = datetime.strftime("#{year}-#{input_month}-01")
-      end_date = Date.civil(year.to_i, input_month.to_i, -1)
+      start_date = datetime.strftime("#{year}-#{month}-01")
+      end_date = Date.civil(year.to_i, month.to_i, -1)
       end_date = end_date.strftime("%Y-%m-%d")
       Acquisition.where("user_id = #{user.id} AND first_payment_date >= '#{start_date}' AND first_payment_date <= '#{end_date}'")
     end

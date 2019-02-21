@@ -3,6 +3,7 @@ module ApplicationHelper
     current_user_mou_product_ids = []
     total_periodic_sf = 0
     sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_sf_user(token, month))
+
     if sf["data"]["user"].present?
       sf["data"]["user"]["mousWithComponent"].each do |mou|
           # mou_ids.push(mou["mouId"].to_i)
@@ -26,5 +27,18 @@ module ApplicationHelper
       end
     end
     return total_periodic_sf - total_periodic_xcost
+  end
+
+  def total_periodic_proposal(token,month)
+    total_periodic_proposal = 0
+    data = GraphqlApi.customer(QueryModules::QueryCustomer.get_proposal_user(token, month))
+    if data["data"]["user"].present?
+        data["data"]["user"]["proposals"].each do |proposal|
+            proposal["product"].each do |product|
+                total_periodic_proposal += product["periodicFee"]["finalPrice"]
+            end
+        end
+    end
+    return total_periodic_proposal
   end
 end

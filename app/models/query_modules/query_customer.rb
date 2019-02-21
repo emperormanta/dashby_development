@@ -172,6 +172,7 @@ module QueryModules
     def self.get_proposal_dashby(project_id)
       query = "{
         getProposalDashby(projectId: #{project_id}){
+          id
           projectId
           createdAt
         }

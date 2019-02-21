@@ -1,0 +1,2 @@
+class ActiveAchievementMonthly < ApplicationRecord
+end

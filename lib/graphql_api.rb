@@ -3,7 +3,8 @@ class GraphqlApi
     attr_accessor :token_api
   end
   def self.customer(query)
-    HTTParty.post("#{CONFIG["customer_api"]}?auth_token=#{self.token_api}",
+    HTTParty.post("#{CONFIG["customer_api"]}?auth_token=687608876f524fd34f6ce9830f9bea68",
+    :verify => false,
       :body => {
         query: query
       }.to_json,
@@ -16,6 +17,7 @@ class GraphqlApi
       'Authorization' => "Bearer #{self.token_api}"
     }
     HTTParty.post("#{CONFIG["xcost_api"]}",
+    :verify => false,
       :body => {
         query: query
       }.to_json,

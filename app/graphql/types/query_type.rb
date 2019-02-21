@@ -1,16 +1,16 @@
 include ApplicationHelper
 module Types
   class QueryType < Types::BaseObject
-    # field :hit_rate, Types::HitRateType, null: true do
-    #   argument :tokens, [String], required: true
-    #   argument :month, Int, required: true
-    # end
-    # def hit_rate(tokens:, month:)
-    #   {
-    #     tokens: tokens,
-    #     month: month
-    #   }
-    # end
+    field :hit_rate, Types::HitRateType, null: true do
+      argument :tokens, [String], required: true
+      argument :month, Int, required: true
+    end
+    def hit_rate(tokens:, month:)
+      {
+        tokens: tokens,
+        month: month
+      }
+    end
 
     field :get_proposal_user, [Types::CustomerType::ProposalType], null: true do
       argument :token, String, required: true
@@ -36,7 +36,7 @@ module Types
     end
     def get_nilai_proposal(token:, month:)
       proposal = GraphqlApi.customer(QueryModules::QueryCustomer.get_proposal_user(token, month))
-      return proposal["data"]["user"]["proposals"].present? ? proposal["data"]["user"] : []
+      proposal["data"]["user"]
     end
 
     field :get_nilai_sf, Types::NilaiSfType, null: true do
@@ -67,7 +67,7 @@ module Types
     def get_nilai_proposal_setahun(user_token:)
       proposal = GraphqlApi.customer(QueryModules::QueryCustomer.get_proposal_yearly(user_token))
       data = proposal["data"]["user"]["proposalYearly"]
-      return get_proposal(data, user_token).present? ? get_proposal(data, user_token) : []
+      return get_proposal(data, user_token)
     end
 
     field :get_nilai_sf_setahun, Types::ReportMonthType, null: true do
@@ -79,35 +79,33 @@ module Types
       return get_sf(data, user_token)
     end
 
-    # field :get_hit_rate, [Types::HitRateType], null: false do
-    #   argument :token, String, required: true
-    #   argument :month, Int, required: true
-    # end
-    # def get_hit_rate(token:, month:)
-    #   user = User.find_by(authentication_token: token)
-    #   active_achievement = ActiveAchievementMonthly.where(user_id: user.id)
-    #   return active_achievement
-    # end
+    field :get_hit_rate, [Types::HitRateType], null: false do
+      argument :token, String, required: true
+      argument :month, Int, required: true
+    end
+    def get_hit_rate(token:, month:)
+      user = User.find_by(authentication_token: token)
+      active_achievement = ActiveAchievementMonthly.where(user_id: user.id)
+      return active_achievement
+    end
 
-    # field :get_acquisition, Types::GetAcquisitionType, null: false do
-    #   argument :token, String, required: true
-    #   argument :month, Int, required: true
-    # end
+    field :get_acquisition, Types::GetAcquisitionType, null: false do
+      argument :token, String, required: true
+      argument :month, Int, required: true
+    end
 
-    # def get_acquisition(token:,month:)
-    #   user = User.find_by(authentication_token: token)
-    #   datetime = DateTime.now
-    #   # day = datetime.strftime("%d")
-    #   # month = datetime.strftime("%m")
-    #   month = 1
-    #   month = sprintf('%02d', month)
-    #   year = datetime.strftime("%Y")
-    #   start_date = datetime.strftime("#{year}-#{month}-01")
-    #   end_date = Date.civil(year.to_i, month.to_i, -1)
-    #   end_date = end_date.strftime("%Y-%m-%d")
-
-    #   Acquisition.where("user_id = #{user.id} AND first_payment_date >= '#{start_date}' AND first_payment_date <= '#{end_date}'")
-    # end
+    def get_acquisition(token:,month:)
+      user = User.find_by(authentication_token: token)
+      datetime = DateTime.now
+      # day = datetime.strftime("%d")
+      month = datetime.strftime("%m")
+      month = sprintf('%02d', month)
+      year = datetime.strftime("%Y")
+      start_date = datetime.strftime("#{year}-#{month}-01")
+      end_date = Date.civil(year.to_i, month.to_i, -1)
+      end_date = end_date.strftime("%Y-%m-%d")
+      Acquisition.where("user_id = #{user.id} AND first_payment_date >= '#{start_date}' AND first_payment_date <= '#{end_date}'")
+    end
 
     field :get_achievement, Types::AchievementType, null: true do
       argument :user_token, String, required: false

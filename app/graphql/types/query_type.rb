@@ -89,7 +89,7 @@ module Types
       return active_achievement
     end
 
-    field :get_acquisition, Types::GetAcquisitionType, null: false do
+    field :get_acquisition, [Types::GetAcquisitionType], null: false do
       argument :token, String, required: true
       argument :month, Int, required: true
     end
@@ -98,7 +98,7 @@ module Types
       user = User.find_by(authentication_token: token)
       datetime = DateTime.now
       # day = datetime.strftime("%d")
-      month = datetime.strftime("%m")
+      # month = datetime.strftime("%m")
       month = sprintf('%02d', month)
       year = datetime.strftime("%Y")
       start_date = datetime.strftime("#{year}-#{month}-01")

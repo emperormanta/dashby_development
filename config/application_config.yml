@@ -28,6 +28,6 @@ production: &production
   <<: *default
   oauth: "https://auth.dwp.io"
   customer_api: "https://customertrial.dwp.io/graphql"
-
+  xcost_api: "https://trialbackend.dwp.io/graphql"
 staging:
   <<: *default

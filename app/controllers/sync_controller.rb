@@ -32,6 +32,8 @@ class SyncController < ApplicationController
                 # SAVE / UPDATE KE TABEL
                 data = ActiveAchievementMonthly.new
                 data.hit_rate = hit_rate_user
+                data.nilai_proposal = total_net_periodic_proposal
+                data.nilai_sf = total_net_periodic
                 data.user_id = user.id
                 data.master_target_id = master_target.id
                 

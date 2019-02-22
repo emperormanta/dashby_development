@@ -5,28 +5,20 @@ module Types
         
         def on_target_total
             total = 0
-            if object.present?
-                object.each do |acquisition|
-                    master_acquisition = MasterTarget.find_by(id: acquisition["master_target_id"], active: true)
-                    master_acquisition_day = master_acquisition.acquisition
-                    if acquisition["spent_time_day"] < master_acquisition_day
-                        total += 1
-                    end
-                end
+            master_acquisition = MasterTarget.find_by(id: object["master_target_id"], active: true)
+            master_acquisition_day = master_acquisition.acquisition
+            if object["spent_time_day"] < master_acquisition_day
+                total += 1
             end
             return total
         end
 
         def not_on_target_total
             total = 0
-            if object.present?
-                object.each do |acquisition|
-                    master_acquisition = MasterTarget.find_by(id: acquisition["master_target_id"], active: true)
-                    master_acquisition_day = master_acquisition.acquisition
-                    if acquisition["spent_time_day"] > master_acquisition_day
-                        total += 1
-                    end
-                end
+            master_acquisition = MasterTarget.find_by(id: object["master_target_id"], active: true)
+            master_acquisition_day = master_acquisition.acquisition
+            if object["spent_time_day"] > master_acquisition_day
+                total += 1
             end
             return total
         end

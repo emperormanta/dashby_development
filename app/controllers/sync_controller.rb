@@ -1,4 +1,5 @@
 class SyncController < ApplicationController
+    skip_before_action :authenticate_user!
     require 'date'
     include ApplicationHelper
     
@@ -6,14 +7,16 @@ class SyncController < ApplicationController
         # SyncWorker.perform_async()
         # SyncWorker.perform_at("00:00:01".to_time)
         
-        month = Time.now.strftime("%m")
+        # month = Time.now.strftime("%m")
+        month = 1 # BUAT TESTING SAJA
         
         sales_crm_users_division = []
         sales_crm_users_division.push("division LIKE '%\"id\":\"I-02\"%'")
         sales_crm_users_division.push("division LIKE '%\"id\":\"F-02\"%'")
         sales_crm_users_division = sales_crm_users_division.join(' OR ')
 
-        users = User.where(sales_crm_users_division)
+        # users = User.where(sales_crm_users_division)
+        users = User.where(authentication_token: "71b94738d925deac6690baa81750c357") # BUAT TESTING SAJA
 
         users.each do |user|
             mou_ids = []
@@ -21,12 +24,24 @@ class SyncController < ApplicationController
 
             total_net_periodic = total_net_periodic_fee(token, month)
             total_net_periodic_proposal = total_periodic_proposal(token, month)
-
+            
             if total_net_periodic_proposal > 0
-                hit_rate_user = (total_net_periodic / total_periodic_proposal) * 100
+                hit_rate_user = (total_net_periodic.to_f / total_net_periodic_proposal.to_f) * 100
                 master_target = MasterTarget.find_by(user_id: user.id, active:true)
 
                 # SAVE / UPDATE KE TABEL
+                data = ActiveAchievementMonthly.new
+                data.hit_rate = hit_rate_user
+                data.nilai_proposal = total_net_periodic_proposal
+                data.nilai_sf = total_net_periodic
+                data.user_id = user.id
+                data.master_target_id = master_target.id
+                
+                if data.save
+                    render json: { success: true, messages: "Updated Successfully" }
+                else
+                    render json: { success: false, messages: data.errors.full_messages }
+                end
             end
         end
     end

@@ -4,7 +4,7 @@ module ApplicationHelper
     total_periodic_sf = 0
     sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_sf_user(token, month))
 
-    if sf["data"]["user"].present?
+    if sf["data"]["user"]["mousWithComponent"].present?
       sf["data"]["user"]["mousWithComponent"].each do |mou|
           # mou_ids.push(mou["mouId"].to_i)
           mou["mouProducts"].each do |mou_product|
@@ -21,7 +21,7 @@ module ApplicationHelper
   def total_periodic_proposal(token,month)
     total = 0
     data = GraphqlApi.customer(QueryModules::QueryCustomer.get_proposal_user(token, month))
-    if data["data"]["user"].present?
+    if data["data"]["user"]["proposals"].present?
         data["data"]["user"]["proposals"].each do |proposal|
             proposal["product"].each do |product|
                 total += product["periodicFee"]["finalPrice"]
@@ -35,7 +35,7 @@ module ApplicationHelper
     # current_user_mou_product_ids = []
     total_registration_sf = 0
     sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_registration_fee(token, month))
-    if sf["data"]["user"].present?
+    if sf["data"]["user"]["mousWithComponent"].present?
       sf["data"]["user"]["mousWithComponent"].each do |mou|
           # mou_ids.push(mou["mouId"].to_i)
           mou["mouProducts"].each do |mou_product|
@@ -51,7 +51,7 @@ module ApplicationHelper
      # current_user_mou_product_ids = []
      total_installation_sf = 0
      sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_installation_fee(token, month))
-     if sf["data"]["user"].present?
+     if sf["data"]["user"]["mousWithComponent"].present?
        sf["data"]["user"]["mousWithComponent"].each do |mou|
            # mou_ids.push(mou["mouId"].to_i)
            mou["mouProducts"].each do |mou_product|
@@ -64,13 +64,22 @@ module ApplicationHelper
   end
 
   def total_new_user(token, month)
+    total_new_user = 0
+    sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_sf_user(token, month))
+    if !sf["data"]["user"].present?
+      binding.pry
+    end
+    if sf["data"]["user"]["mousWithComponent"].present?
+      total_new_user = sf["data"]["user"]["mousWithComponent"].length
+    end
+    return total_new_user
   end
 
   def current_target_portofolio(token)
     total_target_portofolio = 0
     mou_product_id_for_xcost = []
     data = GraphqlApi.customer(QueryModules::QueryCustomer.get_target_portofolio(token))
-    if data["data"]["user"].present?
+    if data["data"]["user"]["getTargetPortofolioCrm"].present?
       data["data"]["user"]["getTargetPortofolioCrm"].each do |contact_product|
         if contact_product["mouProductId"].present?
           mou_product_id_for_xcost.push(contact_product["mouProductId"])
@@ -87,7 +96,7 @@ module ApplicationHelper
     total_active_portofolio = 0
     mou_product_id_for_xcost = []
     data = GraphqlApi.customer(QueryModules::QueryCustomer.get_active_portofolio(token, month))
-    if data["data"]["user"].present?
+    if data["data"]["user"]["getActivePortofolioCrm"].present?
       data["data"]["user"]["getActivePortofolioCrm"].each do |contact_product|
         if contact_product["mouProductId"].present?
           mou_product_id_for_xcost.push(contact_product["mouProductId"])

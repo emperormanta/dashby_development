@@ -181,6 +181,28 @@ module Types
       return result
     end
 
+    field :get_new_user, Types::MonthlyType, null: true do
+      argument :user_token, String, required: false
+    end
+    def get_new_user(user_token:)
+      return get_new_user_format(user_token, Date.today.month)
+    end
+    
+    field :get_new_user_yearly, [Types::YearlyType], null: true do
+      argument :user_token, String, required: false
+    end
+    def get_new_user_yearly(user_token:)
+      result = []
+      month = 0
+      12.times do
+        result_detail = {}
+        month += 1
+        result_detail = {:name => Date::MONTHNAMES[month].to_date.strftime('%b').upcase, :total => get_new_user_format(user_token, month)}
+        result.push(result_detail)
+      end
+      return result
+    end
+
     private
     def get_proposal(object, user_token)
       begin
@@ -244,7 +266,7 @@ module Types
       current = current > target ? target : current
       upcross = current > target ? current - target : 0
       percentage = (current.to_f / target.to_f) * 100
-      last_month = current_active_portofolio(user_token, month - 1)
+      last_month = month != 1 ? current_active_portofolio(user_token, month - 1) : 0
       result = {:target => target, :current => current, :percentage => percentage, :last_month => last_month, :upcross => upcross}
       return result
     end
@@ -257,9 +279,15 @@ module Types
       registrasi = total_registration_fee(user_token, month).to_f
       result[:current] = (instalasi + registrasi).to_i
       result[:percentage] = (instalasi + registrasi) / target.one_time * 100
-      if month != 1
-        result[:last_month] = total_installation_fee(user_token, month - 1) + total_registration_fee(user_token, month - 1)
-      end
+      result[:last_month] = month != 1 ? total_installation_fee(user_token, month - 1) + total_registration_fee(user_token, month - 1) : 0
+      return result
+    end
+    def get_new_user_format(user_token, month)
+      result = {}
+      result[:target] = 2
+      result[:current] = total_new_user(user_token, month)
+      result[:percentage] = (total_new_user(user_token, month).to_f / 2) * 100
+      result[:last_month] = month != 1 ? total_new_user(user_token, month - 1) : 0
       return result
     end
   end

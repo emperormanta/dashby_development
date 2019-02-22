@@ -66,9 +66,6 @@ module ApplicationHelper
   def total_new_user(token, month)
     total_new_user = 0
     sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_sf_user(token, month))
-    if !sf["data"]["user"].present?
-      binding.pry
-    end
     if sf["data"]["user"]["mousWithComponent"].present?
       total_new_user = sf["data"]["user"]["mousWithComponent"].length
     end

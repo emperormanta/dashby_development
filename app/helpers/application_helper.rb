@@ -90,7 +90,7 @@ module ApplicationHelper
     total = 0
     if mou_product_ids.present?
       xcosts = GraphqlApi.xcost(QueryModules::QueryXcost.get_costs(mou_product_ids))
-      if xcosts["data"].present?
+      if xcosts["data"]["getCosts"].present?
         xcosts = JSON.parse(xcosts["data"]["getCosts"])
         xcosts["mou_products"].each do |mou_product|
           mou_product["costs"].each do |cost|

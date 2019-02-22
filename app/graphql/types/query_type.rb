@@ -221,7 +221,7 @@ module Types
       current = current_active_portofolio(user_token, month)
       current = current > target ? target : current
       upcross = current > target ? current - target : 0
-      percentage = ((current.to_f / target.to_f) * 100).round.to_i
+      percentage = (current.to_f / target.to_f) * 100
       last_month = current_active_portofolio(user_token, month - 1)
       result = {:target => target, :current => current, :percentage => percentage, :last_month => last_month, :upcross => upcross}
       return result

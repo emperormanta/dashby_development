@@ -158,7 +158,29 @@ module Types
       end
       return result
     end
-    
+
+    field :get_installation_registration, Types::MonthlyType, null: true do 
+      argument :user_token, String, required: false
+    end
+    def get_installation_registration(user_token:)
+      return get_installation_registration_format(user_token, Date.today.month)      
+    end
+
+    field :get_installation_registration_yearly, [Types::YearlyType], null: true do
+      argument :user_token, String, required: false
+    end
+    def get_installation_registration_yearly(user_token:)
+      result = []
+      month = 0
+      12.times do
+        result_detail = {}
+        month += 1
+        result_detail = {:name => Date::MONTHNAMES[month].to_date.strftime('%b').upcase, :total => get_installation_registration_format(user_token, month)}
+        result.push(result_detail)
+      end
+      return result
+    end
+
     private
     def get_proposal(object, user_token)
       begin
@@ -224,6 +246,20 @@ module Types
       percentage = (current.to_f / target.to_f) * 100
       last_month = current_active_portofolio(user_token, month - 1)
       result = {:target => target, :current => current, :percentage => percentage, :last_month => last_month, :upcross => upcross}
+      return result
+    end
+    def get_installation_registration_format(user_token, month)
+      result = {}
+      user = User.find_by(authentication_token: user_token)
+      target = MasterTarget.find_by(user_id: user.id)
+      result[:target] = target.one_time
+      instalasi = total_installation_fee(user_token, month).to_f
+      registrasi = total_registration_fee(user_token, month).to_f
+      result[:current] = (instalasi + registrasi).to_i
+      result[:percentage] = (instalasi + registrasi) / target.one_time * 100
+      if month != 1
+        result[:last_month] = total_installation_fee(user_token, month - 1) + total_registration_fee(user_token, month - 1)
+      end
       return result
     end
   end

@@ -224,5 +224,57 @@ module QueryModules
         }
       })
     end
+
+    def self.get_installation_fee(token, month)
+      %(query{
+        user(token: "#{token}") {
+          mousWithComponent(params: {month: #{month}}) {
+            mouId
+            mouProducts {
+              id
+              name
+              installationFee {
+                componentName
+                finalPrice
+                quantity
+                unit
+                componentType
+                chargePeriod
+              }
+            }
+            pic {
+              email
+            }
+          }
+        }
+      }
+      )
+    end
+
+    def self.get_registration_fee(token, month)
+      %(query{
+        user(token: "#{token}") {
+          mousWithComponent(params: {month: #{month}}) {
+            mouId
+            mouProducts {
+              id
+              name
+              registrationFee {
+                componentName
+                finalPrice
+                quantity
+                unit
+                componentType
+                chargePeriod
+              }
+            }
+            pic {
+              email
+            }
+          }
+        }
+      }
+      )
+    end
   end
 end

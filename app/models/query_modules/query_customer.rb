@@ -178,5 +178,51 @@ module QueryModules
         }
       }"
     end
+
+    def self.get_target_portofolio(token)
+      %({
+        user(token: "#{token}"){
+          getTargetPortofolioCrm{
+            customer {
+              name
+              id  
+            }
+            mouProductId
+            product {
+              name
+              periodicFee {
+                finalPrice
+              }
+            }
+          }
+        }
+      })
+    end
+
+    def self.get_active_portofolio(token, month)
+      %({
+        user(token: "#{token}"){
+          getActivePortofolioCrm(month: #{month}){
+            customer {
+              name
+              id  
+            }
+            mouProductId
+            product {
+              name
+              periodicFee {
+                finalPrice
+              }
+              activeDate
+              endContract
+              parentProduct {
+                name
+                activeDate
+              }
+            }
+          }
+        }
+      })
+    end
   end
 end

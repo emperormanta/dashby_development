@@ -137,6 +137,28 @@ module Types
       return result
     end
 
+    field :get_renewal, Types::RenewalMonthlyType, null: true do
+      argument :user_token, String, required: false
+    end
+    def get_renewal(user_token:)
+      return get_renewal_format(user_token, Date.today.month)
+    end
+
+    field :get_renewal_setahun, [Types::RenewalYearlyType], null: true do
+      argument :user_token, String, required: false
+    end
+    def get_renewal_setahun(user_token:)
+      result = []
+      month = 0
+      12.times do
+        result_detail = {}
+        month += 1
+        result_detail = {:name => Date::MONTHNAMES[month].to_date.strftime('%b').upcase, :total => get_renewal_format(user_token, month)}
+        result.push(result_detail)
+      end
+      return result
+    end
+    
     private
     def get_proposal(object, user_token)
       begin
@@ -193,6 +215,16 @@ module Types
       rescue => e
         raise GraphQL::ExecutionError, "User atau Target tidak ditemukan"
       end
+    end
+    def get_renewal_format(user_token, month)
+      target = current_target_portofolio(user_token)
+      current = current_active_portofolio(user_token, month)
+      current = current > target ? target : current
+      upcross = current > target ? current - target : 0
+      percentage = ((current.to_f / target.to_f) * 100).round.to_i
+      last_month = current_active_portofolio(user_token, month - 1)
+      result = {:target => target, :current => current, :percentage => percentage, :last_month => last_month, :upcross => upcross}
+      return result
     end
   end
 end

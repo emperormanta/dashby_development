@@ -31,18 +31,31 @@ module ApplicationHelper
     return total
   end
 
-  # def current_active_portofolio(token, month)
-  #   total_active_portofolio = 0
-  #   data = GraphqlApi.customer(QueryModules::QueryCustomer.get_active_portofolio(token, month))
-  #   if data["data"]["user"].present?
-  #     data["data"]["user"]["getActivePortofolioCrm"].each do |contact_product|
-  #       mou_product_id_for_xcost.push(contact_product["mouProductId"])
-  #       total_active_portofolio += contact_product["product"]["periodicFee"]["finalPrice"]
-  #     end
-  #   end
-  #   total_periodic_xcost = get_total_xcost(mou_product_id_for_xcost)
-  #   return total_active_portofolio - total_periodic_xcost
-  # end
+  def current_target_portofolio(token)
+    total_target_portofolio = 0
+    data = GraphqlApi.customer(QueryModules::QueryCustomer.get_target_portofolio(token))
+    if data["data"]["user"].present?
+      data["data"]["user"]["getTargetPortofolioCrm"].each do |contact_product|
+        total_target_portofolio += contact_product["product"]["periodicFee"]["finalPrice"]
+      end
+    end
+    return total_target_portofolio
+
+  end
+
+  def current_active_portofolio(token, month)
+    total_active_portofolio = 0
+    mou_product_id_for_xcost = []
+    data = GraphqlApi.customer(QueryModules::QueryCustomer.get_active_portofolio(token, month))
+    if data["data"]["user"].present?
+      data["data"]["user"]["getActivePortofolioCrm"].each do |contact_product|
+        mou_product_id_for_xcost.push(contact_product["mouProductId"])
+        total_active_portofolio += contact_product["product"]["periodicFee"]["finalPrice"]
+      end
+    end
+    total_periodic_xcost = get_total_xcost(mou_product_id_for_xcost)
+    return total_active_portofolio - total_periodic_xcost
+  end
 
   def get_total_xcost(mou_product_ids)
     total = 0

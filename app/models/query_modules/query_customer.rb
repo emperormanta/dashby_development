@@ -1,9 +1,6 @@
 module QueryModules
   module QueryCustomer
-    def self.get_proposal(
-      tokens,
-      month
-      )
+    def self.get_proposal(tokens, month)
       %(query{
         proposals(params: {token: #{tokens},month: #{month}}){
         project{
@@ -46,10 +43,10 @@ module QueryModules
       })
     end
 
-    def self.get_proposal_user(token, month)
+    def self.get_proposal_user(token, month, year)
       %(query{
           user(token: "#{token}"){
-            proposals(params: {month: #{month}}){
+            proposals(params: {month: #{month}, year: #{year}}){
               project{
                 id
                 projectName
@@ -69,16 +66,17 @@ module QueryModules
                   finalPrice
                 }
               }
+              createdAt
             }
           }
         }
       )
     end
 
-    def self.get_sf_user(token,month)
+    def self.get_sf_user(token,month, year)
       %(query{
         user(token: "#{token}") {
-          mousWithComponent(params: {month: #{month}}) {
+          mousWithComponent(params: {month: #{month}, year: #{year}}) {
             mouId
             mouProducts {
               id

@@ -1,73 +1,29 @@
 include ApplicationHelper
 module Types
   class QueryType < Types::BaseObject
-    field :hit_rate, Types::HitRateType, null: true do
-      argument :tokens, [String], required: true
-      argument :month, Int, required: true
-    end
-    def hit_rate(tokens:, month:)
-      {
-        tokens: tokens,
-        month: month
-      }
-    end
-
-    field :get_proposal_user, [Types::CustomerType::ProposalType], null: true do
-      argument :token, String, required: true
-      argument :month, Int, required: true
-    end
-    def get_proposal_user(token:, month:)
-      proposal = GraphqlApi.customer(QueryModules::QueryCustomer.get_proposal_user(token, month))
-      proposal["data"]["user"]["proposals"]
-    end
-
-    field :get_sf_user, [Types::CustomerType::SfType], null: true do
-      argument :token, String, required: true
-      argument :month, Int, required: true
-    end
-    def get_sf_user(token:, month:)
-      sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_sf_user(token, month))
-      sf["data"]["user"]["mousWithComponent"]
-    end
-
-    field :get_nilai_proposal, Types::NilaiProposalType, null: true do
-      argument :token, String, required: true
-      argument :month, Int, required: true
-    end
-    def get_nilai_proposal(token:, month:)
-      proposal = GraphqlApi.customer(QueryModules::QueryCustomer.get_proposal_user(token, month))
-      proposal["data"]["user"]
-    end
-
-    field :get_nilai_sf, Types::NilaiSfType, null: true do
-      argument :token, String, required: true
-      argument :month, Int, required: true
-    end
-    def get_nilai_sf(token:, month:)
-      sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_sf_user(token, month))
-      sf["data"]["user"]
-    end
-
-    field :get_target, Types::TargetType, null: true do 
+    field :value_of_proposal, Types::Output::OutputType, null: true do
       argument :user_token, String, required: false
     end
-    def get_target(user_token:)
-      user = User.find_by(authentication_token: user_token)
-      MasterTarget.find_by(user_id: user.id,active: true)
-    end
-    
-    field :get_targets, [Types::TargetType], null: true
-    def get_targets
-      MasterTarget.all.where(active: true)
+    def value_of_proposal(user_token:)
+      result = {}
+      target = get_target(user_token)
+      value_of_proposal = total_periodic_proposal(user_token, [Date.today.month])
+      result[:name] = get_month_name(Date.today.month)
+      result[:current] = value_of_proposal.present? ? value_of_proposal : 0
+      result[:percentage] = value_of_proposal.present? && target.present? ? get_percentage(value_of_proposal, target.nominal) : 0
+      result[:last_month] = total_periodic_proposal(user_token, [Date.today.month - 1])
+      output = {target: target.nominal, monthly_result: result}
+      return output
     end
 
-    field :get_nilai_proposal_setahun, Types::ReportMonthType, null: true do
+    field :value_of_proposal_yearly, Types::Output::OutputType, null: true do
       argument :user_token, String, required: false
     end
-    def get_nilai_proposal_setahun(user_token:)
-      proposal = GraphqlApi.customer(QueryModules::QueryCustomer.get_proposal_yearly(user_token))
-      data = proposal["data"]["user"]["proposalYearly"]
-      return get_proposal(data, user_token)
+    def value_of_proposal_yearly(user_token:)
+      output = {target: get_target(user_token).nominal, yearly_result: total_periodic_proposal(user_token)}
+      return output
+      # data = proposal["data"]["user"]["proposalYearly"]
+      # return get_proposal(data, user_token)
     end
 
     field :get_nilai_sf_setahun, Types::ReportMonthType, null: true do
@@ -103,7 +59,6 @@ module Types
       argument :month, Int, required: false
       argument :year, Int, required: false
     end
-
     def get_acquisition(token:,month: nil,year: nil)
       user = User.find_by(authentication_token: token)
       datetime = DateTime.now
@@ -119,22 +74,30 @@ module Types
       Acquisition.where("user_id = #{user.id} AND first_payment_date >= '#{start_date}' AND first_payment_date <= '#{end_date}'")
     end
 
-    field :get_achievement, Types::AchievementType, null: true do
+    field :revenue, Types::Output::OutputType, null: true do
       argument :user_token, String, required: false
     end
+    def revenue(user_token:)
+      current = total_net_periodic_fee(user_token, Date.today.month)
+      target = get_target(user_token).periodic
+      result = {name: get_month_name(Date.today.month),      
+                current: total_net_periodic_fee(user_token, Date.today.month), 
+                percentage: get_percentage(current, target.periodic),
+                last_month: total_net_periodic_fee(user_token, Date.today.month)}
+      output = {target: target.periodic, monthly_result: result}
+      return output
 
-    def get_achievement(user_token:)
-      result = {}
-      user = User.find_by(authentication_token: user_token)
-      if user.present?
-        target =  MasterTarget.find_by(user_id: user.id)
-        current_month = Time.now.strftime("%m")
-        result[:target_achievement] = target.present? ? target.periodic : 0
-        result[:current_achievement] = total_net_periodic_fee(user_token, current_month.to_i)
-        result[:percentage] = ((result[:current_achievement].to_f / result[:target_achievement].to_f) * 100).round
-        result[:last_month_achievement] = current_month.to_i > 1 ? total_net_periodic_fee(user_token, current_month.to_i - 1) : 0
-      end
-      return result
+      # result = {}
+      # user = User.find_by(authentication_token: user_token)
+      # if user.present?
+      #   target =  MasterTarget.find_by(user_id: user.id)
+      #   current_month = Date.today.month
+      #   result[:target_achievement] = target.present? ? target.periodic : 0
+      #   result[:current_achievement] = total_net_periodic_fee(user_token, current_month)
+      #   result[:percentage] = ((result[:current_achievement].to_f / result[:target_achievement].to_f) * 100).round
+      #   result[:last_month_achievement] = current_month.to_i > 1 ? total_net_periodic_fee(user_token, current_month.to_i - 1) : 0
+      # end
+      # return result
     end
 
     field :get_renewal, Types::RenewalMonthlyType, null: true do
@@ -144,7 +107,7 @@ module Types
       return get_renewal_format(user_token, Date.today.month)
     end
 
-    field :get_renewal_setahun, [Types::RenewalYearlyType], null: true do
+    field :get_renewal_yearly, [Types::RenewalYearlyType], null: true do
       argument :user_token, String, required: false
     end
     def get_renewal_setahun(user_token:)
@@ -201,6 +164,11 @@ module Types
         result.push(result_detail)
       end
       return result
+    end
+
+    field :get_targets, [Types::TargetType], null: true
+    def get_targets
+      MasterTarget.all.where(active: true)
     end
 
     private
@@ -292,3 +260,53 @@ module Types
     end
   end
 end
+
+    
+# Ga dipake
+# # Cara v1
+# field :hit_rate, Types::HitRateType, null: true do
+#   argument :tokens, [String], required: true
+#   argument :month, Int, required: true
+# end
+# def hit_rate(tokens:, month:)
+#   {
+#     tokens: tokens,
+#     month: month
+#   }
+# end
+
+# # Cara v2
+# field :get_proposal_user, [Types::CustomerType::ProposalType], null: true do
+#   argument :token, String, required: true
+#   argument :month, Int, required: true
+# end
+# def get_proposal_user(token:, month:)
+#   proposal = GraphqlApi.customer(QueryModules::QueryCustomer.get_proposal_user(token, month))
+#   proposal["data"]["user"]["proposals"]
+# end
+
+# field :get_sf_user, [Types::CustomerType::SfType], null: true do
+#   argument :token, String, required: true
+#   argument :month, Int, required: true
+# end
+# def get_sf_user(token:, month:)
+#   sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_sf_user(token, month))
+#   sf["data"]["user"]["mousWithComponent"]
+# end
+
+# field :get_nilai_sf, Types::NilaiSfType, null: true do
+#   argument :token, String, required: true
+#   argument :month, Int, required: true
+# end
+# def get_nilai_sf(token:, month:)
+#   sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_sf_user(token, month))
+#   sf["data"]["user"]
+# end
+
+# field :get_target, Types::TargetType, null: true do 
+#   argument :user_token, String, required: false
+# end
+# def get_target(user_token:)
+#   user = User.find_by(authentication_token: user_token)
+#   MasterTarget.find_by(user_id: user.id,active: true)
+# end

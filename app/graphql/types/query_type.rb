@@ -12,19 +12,19 @@ module Types
       result[:current] = value_of_proposal.present? ? value_of_proposal : 0
       result[:percentage] = value_of_proposal.present? && target.present? ? get_percentage(value_of_proposal, target.nominal) : 0
       result[:last_month] = total_periodic_proposal(user_token, [Date.today.month - 1])
-      output = {target: target.nominal, monthly_result: result}
+      output = {target: target.nominal, monthly_result: result, yearly_result: total_periodic_proposal(user_token)}
       return output
     end
 
-    field :value_of_proposal_yearly, Types::Output::OutputType, null: true do
-      argument :user_token, String, required: false
-    end
-    def value_of_proposal_yearly(user_token:)
-      output = {target: get_target(user_token).nominal, yearly_result: total_periodic_proposal(user_token)}
-      return output
-      # data = proposal["data"]["user"]["proposalYearly"]
-      # return get_proposal(data, user_token)
-    end
+    # field :value_of_proposal_yearly, Types::Output::OutputType, null: true do
+    #   argument :user_token, String, required: false
+    # end
+    # def value_of_proposal_yearly(user_token:)
+    #   output = {target: get_target(user_token).nominal, }
+    #   return output
+    #   # data = proposal["data"]["user"]["proposalYearly"]
+    #   # return get_proposal(data, user_token)
+    # end
 
     field :revenue, Types::Output::OutputType, null: true do
       argument :user_token, String, required: false
@@ -36,7 +36,7 @@ module Types
                 current: current.present? ? current : 0, 
                 percentage: get_percentage(current, target),
                 last_month: total_net_periodic_fee(user_token, [Date.today.month - 1])}
-      output = {target: target, monthly_result: result}
+      output = {target: target, monthly_result: result, yearly_result: total_net_periodic_fee(user_token)}
       return output
 
       # result = {}
@@ -52,13 +52,13 @@ module Types
       # return result
     end
 
-    field :revenue_yearly, Types::Output::OutputType, null: true do 
-      argument :user_token, String, required: false
-    end
-    def revenue_yearly(user_token:)
-      output = {target: get_target(user_token).nominal, yearly_result: total_net_periodic_fee(user_token)}
-      return output
-    end
+    # field :revenue_yearly, Types::Output::OutputType, null: true do 
+    #   argument :user_token, String, required: false
+    # end
+    # def revenue_yearly(user_token:)
+    #   output = {target: get_target(user_token).nominal, }
+    #   return output
+    # end
 
     field :get_hit_rate, Types::Output::OutputType, null: false do
     # field :get_hit_rate, [Types::HitRateType], null: false do
@@ -82,27 +82,27 @@ module Types
       result = {name: get_month_name(month.to_i), 
                 current: data.hit_rate, 
                 percentage: data.hit_rate }
-      output = {target: get_target(user_token).hit_rate, monthly_result: result}
+      output = {target: get_target(user_token).hit_rate, monthly_result: result,  yearly_result: result}
       return output
     end
 
-    field :get_hit_rate_yearly, Types::Output::OutputType, null: false do
-      argument :user_token, String, required: false
-    end
-    def get_hit_rate_yearly(user_token:)
-      result = []
-      for month in 1..Date.today.month do
-        first_date = Date.new(Date.today.year, month, 1)
-        last_date = first_date.end_of_month
-        data = ActiveAchievementMonthly.where("created_at between '#{first_date}' and '#{last_date}'")
-        result_detail = {name: get_month_name(month),
-                         current: data.present? ? data.last.hit_rate : 0,
-                         percentage: data.present? ? data.last.hit_rate : 0}
-        result.push(result_detail)
-      end
-      output = {target: get_target(user_token).hit_rate, yearly_result: result}
-      return output
-    end
+    # field :get_hit_rate_yearly, Types::Output::OutputType, null: false do
+    #   argument :user_token, String, required: false
+    # end
+    # def get_hit_rate_yearly(user_token:)
+    #   result = []
+    #   for month in 1..Date.today.month do
+    #     first_date = Date.new(Date.today.year, month, 1)
+    #     last_date = first_date.end_of_month
+    #     data = ActiveAchievementMonthly.where("created_at between '#{first_date}' and '#{last_date}'")
+    #     result_detail = {name: get_month_name(month),
+    #                      current: data.present? ? data.last.hit_rate : 0,
+    #                      percentage: data.present? ? data.last.hit_rate : 0}
+    #     result.push(result_detail)
+    #   end
+    #   output = {target: get_target(user_token).hit_rate,}
+    #   return output
+    # end
 
     field :network_installation_registration, Types::Output::OutputType, null: true do 
       argument :user_token, String, required: false
@@ -114,17 +114,17 @@ module Types
                 current: current.present? ? current : 0, 
                 percentage: get_percentage(current, target),
                 last_month: total_installation_registration_fee(user_token, [Date.today.month - 1])}
-      output = {target: get_target(user_token).one_time, monthly_result: result}
+      output = {target: get_target(user_token).one_time, monthly_result: result, yearly_result: total_installation_registration_fee(user_token)}
       return output
     end
 
-    field :network_installation_registration_yearly, Types::Output::OutputType, null: true do 
-      argument :user_token, String, required: false
-    end
-    def network_installation_registration_yearly(user_token:)
-      output = {target: get_target(user_token).one_time, yearly_result: total_installation_registration_fee(user_token)}
-      return output
-    end
+    # field :network_installation_registration_yearly, Types::Output::OutputType, null: true do 
+    #   argument :user_token, String, required: false
+    # end
+    # def network_installation_registration_yearly(user_token:)
+    #   output = {target: get_target(user_token).one_time, }
+    #   return output
+    # end
 
     field :get_nilai_sf_setahun, Types::ReportMonthType, null: true do
       argument :user_token, String, required: false

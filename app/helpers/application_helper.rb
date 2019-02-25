@@ -4,19 +4,37 @@ module ApplicationHelper
     total_periodic_sf = 0
     month ||= [*1..Date.today.month] # Isi dengan array bulan 1 sampai bulan berjalan
     sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_sf_user(token, month, Date.today.year))
-    binding.pry
     if sf["data"]["user"]["mousWithComponent"].present?
-      sf["data"]["user"]["mousWithComponent"].each do |mou|
+      if month.length == 1
+        sf["data"]["user"]["mousWithComponent"].each do |mou|
           # mou_ids.push(mou["mouId"].to_i)
           mou["mouProducts"].each do |mou_product|
             current_user_mou_product_ids.push(mou_product["id"].to_i)
             total_periodic_sf += mou_product["periodicFee"]["finalPrice"]
           end
+        end
+        total_periodic_xcost = get_total_xcost(current_user_mou_product_ids)
+        return total_periodic_sf - total_periodic_xcost
+      else
+        yearly_data = []
+        month.each do |current_month|
+          current_month_total = 0
+          sf["data"]["user"]["mousWithComponent"].each do |mou|
+            if mou["paymentDate"].to_date.month == current_month 
+              mou["mouProducts"].each do |mou_product|
+                current_user_mou_product_ids.push(mou_product["id"].to_i)
+                current_month_total += mou_product["periodicFee"]["finalPrice"]
+              end
+            end
+          end
+          total_periodic_xcost = get_total_xcost(current_user_mou_product_ids)
+          current_month_target = get_target(token).periodic
+          result = {name: get_month_name(current_month), current:  current_month_total - total_periodic_xcost, percentage: get_percentage(current_month_total - total_periodic_xcost, current_month_target), current_month_target: current_month_target}
+          yearly_data.push(result)
+        end
+        return yearly_data
       end
     end
-
-    total_periodic_xcost = get_total_xcost(current_user_mou_product_ids)
-    return total_periodic_sf - total_periodic_xcost
   end
 
   def total_periodic_proposal(token, month = nil)
@@ -51,20 +69,41 @@ module ApplicationHelper
     end
   end
 
-  def total_registration_fee(token, month)
-    # current_user_mou_product_ids = []
+  def total_installation_registration_fee(token, month = nil)
     total_registration_sf = 0
-    sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_registration_fee(token, month))
+    total_installation_sf = 0
+    month ||= [*1..Date.today.month] # Isi dengan array bulan 1 sampai bulan berjalan
+    sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_installation_registration_fee(token, month, Date.today.year))
     if sf["data"]["user"]["mousWithComponent"].present?
-      sf["data"]["user"]["mousWithComponent"].each do |mou|
-          # mou_ids.push(mou["mouId"].to_i)
+      if month.length == 1
+        sf["data"]["user"]["mousWithComponent"].each do |mou|
           mou["mouProducts"].each do |mou_product|
-            # current_user_mou_product_ids.push(mou_product["id"].to_i)
             total_registration_sf += mou_product["registrationFee"]["finalPrice"]
+            total_installation_sf += mou_product["installationFee"]["finalPrice"]
           end
+        end
+        return (total_registration_sf + total_installation_sf)
+      else
+        yearly_data = []
+        month.each do |current_month|
+          sf["data"]["user"]["mousWithComponent"].each do |mou|
+            if mou["paymentDate"].to_date.month == current_month
+              mou["mouProducts"].each do |mou_product|
+                total_registration_sf += mou_product["registrationFee"]["finalPrice"]
+                total_installation_sf += mou_product["installationFee"]["finalPrice"]
+              end
+            end
+          end
+          current_month_target = get_target(token).one_time
+          result = {name: get_month_name(current_month), 
+                    current:  total_registration_sf + total_installation_sf, 
+                    percentage: get_percentage(total_registration_sf + total_installation_sf, current_month_target), 
+                    current_month_target: current_month_target,}
+          yearly_data.push(result)
+        end
+        return yearly_data
       end
     end
-    return total_registration_sf
   end
 
   def total_installation_fee(token, month)

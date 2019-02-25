@@ -73,7 +73,7 @@ module QueryModules
       )
     end
 
-    def self.get_sf_user(token,month, year)
+    def self.get_sf_user(token, month, year)
       %(query{
         user(token: "#{token}") {
           mousWithComponent(params: {month: #{month}, year: #{year}}) {
@@ -90,6 +90,7 @@ module QueryModules
                 chargePeriod
               }
             }
+            paymentDate
             pic {
               email
             }
@@ -223,23 +224,22 @@ module QueryModules
       })
     end
 
-    def self.get_installation_fee(token, month)
+    def self.get_installation_registration_fee(token, month, year)
       %(query{
         user(token: "#{token}") {
-          mousWithComponent(params: {month: #{month}}) {
+          mousWithComponent(params: {month: #{month}, year: #{year}}) {
             mouId
             mouProducts {
               id
               name
               installationFee {
-                componentName
                 finalPrice
-                quantity
-                unit
-                componentType
-                chargePeriod
+              }
+              registrationFee {
+                finalPrice
               }
             }
+            paymentDate
             pic {
               email
             }

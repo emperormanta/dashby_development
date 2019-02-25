@@ -26,6 +26,106 @@ module Types
       # return get_proposal(data, user_token)
     end
 
+    field :revenue, Types::Output::OutputType, null: true do
+      argument :user_token, String, required: false
+    end
+    def revenue(user_token:)
+      current = total_net_periodic_fee(user_token, [Date.today.month])
+      target = get_target(user_token).periodic
+      result = {name: get_month_name(Date.today.month),      
+                current: current.present? ? current : 0, 
+                percentage: get_percentage(current, target),
+                last_month: total_net_periodic_fee(user_token, [Date.today.month - 1])}
+      output = {target: target, monthly_result: result}
+      return output
+
+      # result = {}
+      # user = User.find_by(authentication_token: user_token)
+      # if user.present?
+      #   target =  MasterTarget.find_by(user_id: user.id)
+      #   current_month = Date.today.month
+      #   result[:target_achievement] = target.present? ? target.periodic : 0
+      #   result[:current_achievement] = total_net_periodic_fee(user_token, current_month)
+      #   result[:percentage] = ((result[:current_achievement].to_f / result[:target_achievement].to_f) * 100).round
+      #   result[:last_month_achievement] = current_month.to_i > 1 ? total_net_periodic_fee(user_token, current_month.to_i - 1) : 0
+      # end
+      # return result
+    end
+
+    field :revenue_yearly, Types::Output::OutputType, null: true do 
+      argument :user_token, String, required: false
+    end
+    def revenue_yearly(user_token:)
+      output = {target: get_target(user_token).nominal, yearly_result: total_net_periodic_fee(user_token)}
+      return output
+    end
+
+    field :get_hit_rate, Types::Output::OutputType, null: false do
+    # field :get_hit_rate, [Types::HitRateType], null: false do
+      argument :user_token, String, required: false
+      argument :month, Int, required: false
+      argument :year, Int, required: false
+    end
+    def get_hit_rate(user_token:, month: nil, year: nil)
+      # user = User.find_by(authentication_token: token)
+      datetime = DateTime.now
+      month ||= datetime.strftime("%m")
+      year ||= datetime.strftime("%Y")
+
+      # # month = sprintf('%02d', month)
+      # # start_date = "#{year}-#{month}-01"
+      # # end_date = Date.civil(year.to_i, month.to_i, -1)
+      # # end_date = end_date.strftime("%Y-%m-%d")
+
+      # active_achievement = ActiveAchievementMonthly.where("user_id = #{user.id}")
+      data = ActiveAchievementMonthly.find_by(user_id: User.find_by(authentication_token: user_token).id)
+      result = {name: get_month_name(month.to_i), 
+                current: data.hit_rate, 
+                percentage: data.hit_rate }
+      output = {target: get_target(user_token).hit_rate, monthly_result: result}
+      return output
+    end
+
+    field :get_hit_rate_yearly, Types::Output::OutputType, null: false do
+      argument :user_token, String, required: false
+    end
+    def get_hit_rate_yearly(user_token:)
+      result = []
+      for month in 1..Date.today.month do
+        first_date = Date.new(Date.today.year, month, 1)
+        last_date = first_date.end_of_month
+        data = ActiveAchievementMonthly.where("created_at between '#{first_date}' and '#{last_date}'")
+        result_detail = {name: get_month_name(month),
+                         current: data.present? ? data.last.hit_rate : 0,
+                         percentage: data.present? ? data.last.hit_rate : 0}
+        result.push(result_detail)
+      end
+      output = {target: get_target(user_token).hit_rate, yearly_result: result}
+      return output
+    end
+
+    field :network_installation_registration, Types::Output::OutputType, null: true do 
+      argument :user_token, String, required: false
+    end
+    def network_installation_registration(user_token:)
+      current = total_installation_registration_fee(user_token, [Date.today.month])
+      target = get_target(user_token).one_time
+      result = {name: get_month_name(Date.today.month),      
+                current: current.present? ? current : 0, 
+                percentage: get_percentage(current, target),
+                last_month: total_installation_registration_fee(user_token, [Date.today.month - 1])}
+      output = {target: get_target(user_token).one_time, monthly_result: result}
+      return output
+    end
+
+    field :network_installation_registration_yearly, Types::Output::OutputType, null: true do 
+      argument :user_token, String, required: false
+    end
+    def network_installation_registration_yearly(user_token:)
+      output = {target: get_target(user_token).one_time, yearly_result: total_installation_registration_fee(user_token)}
+      return output
+    end
+
     field :get_nilai_sf_setahun, Types::ReportMonthType, null: true do
       argument :user_token, String, required: false
     end
@@ -33,25 +133,6 @@ module Types
       sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_mou_yearly(user_token))
       data = sf["data"]["user"]["mousWithComponentYearly"]
       return get_sf(data, user_token)
-    end
-
-    field :get_hit_rate, [Types::HitRateType], null: false do
-      argument :token, String, required: true
-      argument :month, Int, required: false
-      argument :year, Int, required: false
-    end
-    def get_hit_rate(token:, month: nil, year: nil)
-      user = User.find_by(authentication_token: token)
-      datetime = DateTime.now
-      month = month.nil? ? datetime.strftime("%m") : month
-      year = year.nil? ?  datetime.strftime("%Y") : year
-
-      # month = sprintf('%02d', month)
-      # start_date = "#{year}-#{month}-01"
-      # end_date = Date.civil(year.to_i, month.to_i, -1)
-      # end_date = end_date.strftime("%Y-%m-%d")
-
-      active_achievement = ActiveAchievementMonthly.where("user_id = #{user.id}")
     end
 
     field :get_acquisition, [Types::GetAcquisitionType], null: false do
@@ -72,32 +153,6 @@ module Types
       end_date = Date.civil(year.to_i, month.to_i, -1)
       end_date = end_date.strftime("%Y-%m-%d")
       Acquisition.where("user_id = #{user.id} AND first_payment_date >= '#{start_date}' AND first_payment_date <= '#{end_date}'")
-    end
-
-    field :revenue, Types::Output::OutputType, null: true do
-      argument :user_token, String, required: false
-    end
-    def revenue(user_token:)
-      current = total_net_periodic_fee(user_token, Date.today.month)
-      target = get_target(user_token).periodic
-      result = {name: get_month_name(Date.today.month),      
-                current: total_net_periodic_fee(user_token, Date.today.month), 
-                percentage: get_percentage(current, target.periodic),
-                last_month: total_net_periodic_fee(user_token, Date.today.month)}
-      output = {target: target.periodic, monthly_result: result}
-      return output
-
-      # result = {}
-      # user = User.find_by(authentication_token: user_token)
-      # if user.present?
-      #   target =  MasterTarget.find_by(user_id: user.id)
-      #   current_month = Date.today.month
-      #   result[:target_achievement] = target.present? ? target.periodic : 0
-      #   result[:current_achievement] = total_net_periodic_fee(user_token, current_month)
-      #   result[:percentage] = ((result[:current_achievement].to_f / result[:target_achievement].to_f) * 100).round
-      #   result[:last_month_achievement] = current_month.to_i > 1 ? total_net_periodic_fee(user_token, current_month.to_i - 1) : 0
-      # end
-      # return result
     end
 
     field :get_renewal, Types::RenewalMonthlyType, null: true do
@@ -126,7 +181,6 @@ module Types
       argument :user_token, String, required: false
     end
     def get_installation_registration(user_token:)
-      return get_installation_registration_format(user_token, Date.today.month)      
     end
 
     field :get_installation_registration_yearly, [Types::YearlyType], null: true do

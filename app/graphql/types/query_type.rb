@@ -78,11 +78,27 @@ module Types
       # # end_date = end_date.strftime("%Y-%m-%d")
 
       # active_achievement = ActiveAchievementMonthly.where("user_id = #{user.id}")
-      data = ActiveAchievementMonthly.find_by(user_id: User.find_by(authentication_token: user_token).id)
+      user = User.find_by(authentication_token: user_token)
+      data = ActiveAchievementMonthly.find_by(user_id: user.id)
       result = {name: get_month_name(month.to_i), 
                 current: data.hit_rate, 
-                percentage: data.hit_rate }
-      output = {target: get_target(user_token).hit_rate, monthly_result: result,  yearly_result: result}
+                percentage: data.hit_rate,
+                total_nominal_proposal: total_periodic_proposal(user_token, [Date.today.month]) ,
+                total_nominal_revenue: total_net_periodic_fee(user_token, [Date.today.month])}
+      yearly_result = []
+      for month in 1..Date.today.month do
+        first_date = Date.new(Date.today.year, month, 1)
+        last_date = first_date.end_of_month
+        data = ActiveAchievementMonthly.where("created_at between '#{first_date}' and '#{last_date}' and user_id = #{user.id}")
+        binding.pry
+        result_detail = {name: get_month_name(month),
+                         current: data.present? ? data.last.hit_rate : 0,
+                         total_nominal_proposal: total_periodic_proposal(user_token, [Date.today.month]),
+                         total_nominal_revenue: total_net_periodic_fee(user_token, [Date.today.month]),
+                         percentage: data.present? ? data.last.hit_rate : 0}
+        yearly_result.push(result_detail)
+      end
+      output = {target: get_target(user_token).hit_rate, monthly_result: result,  yearly_result: yearly_result}
       return output
     end
 

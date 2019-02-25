@@ -126,6 +126,20 @@ module Types
     #   return output
     # end
 
+    field :new_user, Types::Output::OutputType, null: true do 
+      argument :user_token, String, required: false
+    end
+    def new_user(user_token:)
+      current = total_new_user(user_token, [Date.today.month])
+      # target = get_target(user_token).one_time
+      target = 2
+      result = {name: get_month_name(Date.today.month),
+                current: current.present? ? current : 0,
+                percentage: get_percentage(current.present? ? current : 0, target),
+                last_month: total_new_user(user_token, [Date.today.month - 1])}
+      output = {target: target, monthly_result: result, yearly_result: total_new_user(user_token)}
+    end
+
     field :get_nilai_sf_setahun, Types::ReportMonthType, null: true do
       argument :user_token, String, required: false
     end

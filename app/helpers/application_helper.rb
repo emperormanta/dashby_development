@@ -122,11 +122,31 @@ module ApplicationHelper
      return total_installation_sf
   end
 
-  def total_new_user(token, month)
+  def total_new_user(token, month = nil)
     total_new_user = 0
-    sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_sf_user(token, month))
+    month ||= [*1..Date.today.month] # Isi dengan array bulan 1 sampai bulan berjalan
+    sf = GraphqlApi.customer(QueryModules::QueryCustomer.get_sf_user(token, month, Date.today.year))
     if sf["data"]["user"]["mousWithComponent"].present?
-      total_new_user = sf["data"]["user"]["mousWithComponent"].length
+      if month.length == 1
+        total_new_user = sf["data"]["user"]["mousWithComponent"].length
+      else
+        yearly_data = []
+        month.each do |current_month|
+          new_user = 0
+          sf["data"]["user"]["mousWithComponent"].each do |mou|
+            if mou["paymentDate"].to_date.month == current_month
+              new_user +=1
+            end
+          end
+          current_month_target = get_target(token).one_time
+          result = {name: get_month_name(current_month), 
+                    current:  new_user, 
+                    percentage: get_percentage(new_user, current_month_target), 
+                    current_month_target: current_month_target,}
+          yearly_data.push(result)
+        end
+        return yearly_data
+      end
     end
     return total_new_user
   end

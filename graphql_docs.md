@@ -2,7 +2,7 @@
 
 Value of proposal
 -----
-### Monthly
+
 ```
 query($token: String){
   valueOfProposal(userToken: $token){
@@ -13,14 +13,6 @@ query($token: String){
       percentage
       lastMonth
     }
-  }
-}
-```
-### Yearly
-```
-query($token: String){
-  valueOfProposalYearly(userToken: $token){
-    target
     yearlyResult{
       name
       current
@@ -33,7 +25,6 @@ query($token: String){
 Revenue
 ------
 
-### Monthly
 ```
 query($token: String){
   revenue(userToken: $token){
@@ -44,15 +35,6 @@ query($token: String){
       percentage
       lastMonth
     }
-  }
-}
-```
-
-### Yearly
-```
-query($token: String){
-  revenueYearly(userToken: $token){
-    target
     yearlyResult{
       name
       current
@@ -66,7 +48,6 @@ query($token: String){
 Hit Rate
 ------
 
-### Monthly
 ```
 query($token: String){
   getHitRate(userToken: $token){
@@ -75,17 +56,8 @@ query($token: String){
       name
       current
       percentage
-      currentMonthTarget
+      lastMonth
     }
-  }
-}
-```
-
-### Yearly
-```
-query($token: String){
-  getHitRateYearly(userToken: $token){
-    target
     yearlyResult{
       name
       current
@@ -99,7 +71,6 @@ query($token: String){
 Network Installation & Registration
 -----
 
-### Monthly
 ```
 query($token: String){
   networkInstallationRegistration(userToken: $token){
@@ -110,15 +81,29 @@ query($token: String){
       percentage
       lastMonth
     }
+    yearlyResult{
+      name
+      current
+      percentage
+      currentMonthTarget
+    }
   }
 }
 ```
 
-### Yearly
+New User
+------
+
 ```
 query($token: String){
-  networkInstallationRegistrationYearly(userToken: $token){
+  newUser(userToken: $token){
     target
+    monthlyResult{
+      name
+      current
+      percentage
+      lastMonth
+    }
     yearlyResult{
       name
       current
